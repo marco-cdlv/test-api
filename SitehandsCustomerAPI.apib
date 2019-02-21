@@ -1,0 +1,1299 @@
+FORMAT: 1A
+HOST: https://fullqe.sitehands.com
+
+# Sitehands Customer API
+
+This documentation is going to be the main reference for clients to use the Sitehands API. For using the endpoints the access token should generate first going to `Getting Started > Generate access token` once it is generated it should be copied to `Authorization` header for the endpoint that will be used.
+
+# Allowed HTTPs requests:
+<pre>
+PUT     : Update resource
+POST    : To create resource 
+GET     : Get a resource or list of resources
+</pre>
+
+# Description of usual Server Responses:
+- 200 `OK` - the request was successful (some API calls may return 201 instead).
+- 201 `Created` - the request was successful and a resource was created.
+- 204 `No Content` - the request was successful but there is no representation to return (i.e. the response is empty).
+- 400 `Bad Request` - the request could not be understood or was missing required parameters.
+- 401 `Unauthorized` - authentication failed or user doesn't have permissions for requested operation.
+- 403 `Forbidden` - access denied.
+- 404 `Not Found` - resource was not found.
+- 405 `Method Not Allowed` - requested method is not supported for resource.
+
+ 
+## Group Login
+
+    In order to login to the api is needed to generate the access token for using the API's endpoints.
+
+### Access Token - Form Parameters
+
+* `grant_type: password` It is a way to get an access token given a username and password.
+* `client_id: xxxxxxxx` The id of the api that asks for authorization.
+* `client_secret: xxxxxxxx` The secret of the api that asks for the authorization.
+* `scope: api` It will indicate the level of access you require for your api.
+* `username: xxxxxxxx` The user name of the Sitehands app.
+* `password: xxxxxxxx` The password of the Sitehands app.
+
+### Generate access token [POST /oauth/token]
+
+Generates the access token value based on form parameters mentioned before, which are passed in the body part, the generated access token is used to authenticate the user.
+
+You must provide the `Authorization: Bearer {access_token}` header in all other requests.
+
++ Request
+            
+    + Headers
+
+            Content-Type: application/x-www-form-urlencoded
+    
+    + Body 
+             
+            grant_type=password&client_id=52d72e6e-7b0a-4137-9ab2-728dd9333b7f&client_secret=b98c743ca10c195e78c3211c7bf09c64&scope=api&username=contactemailnew1%2Bjpmclient%40gmail.com&password=Control-123*
+
++ Response 200 (application/json)
+
+    + Attributes (Access_Token_Response)
+    
+
+## Group Site
+
+    Information for GET, POST, or PUT http methods related to Site object.
+    
+### List Sites [GET /rest/api/v1/list{?objectType,provideStats,pageSize,currentPage,searchText,orderBy}]
+
+Allows you to get all Sites based on the introduced query parameters. Apart from the listed ones you can add any number of field Names with its respective values.
+
++ Parameters
+
+    + objectType: `Site` (required, string) - Site object name that wants to get records of. Other use can be adding a paramas bellow: <field_name>=<field_value>: `?objectType=Site&Location=a2Km0000000cicFEAQ` - Returns site list that match with param, if not matched is found empty array is returned.
+
+    + provideStats: true (optional, boolean) - Returns an object with relevant information like total number of records, the page number, the quantity of records by page and the objects as a list, used for managing pages in list views (provideStats=true).
+
+    + pageSize: 15 (optional, number) - The quantity of records that wants to be returned (pageSize=15).
+
+    + currentPage: 3 (optional, number) - Used with page size, necessary for pagination (currentPage=3).
+    
+    + searchText: West* (optional, string) - It can be single search criteria or criteria joined by clauses AND, OR. Also it supports wildcarding using '*'.
+        + searchText=Charlotte AND 28217
+        + searchText=Charlotte OR New York
+        + searchText=West\* OR South\*
+    
+    + orderBy: name (optional, string) - It allows multiple fields to be specified in sorting the data for pagination field1, field2, field3 or field1 ASC, field2 DESC, field3 ASC.
+        + orderBy=City ASC
+        + orderBy=Country DESC
+        + orderBy=City,Country,Street
+   
++ Request
+
+    + Headers
+    
+            Authorization: Bearer access_token
+
++ Response 200 (application/json)
+
+    + Attributes (Site_List)
+
+### Get Single Site [GET /rest/api/v1/Site/{object_identifier}{?fullData}]
+
+This endpoint allows to retrive data information about a specific Site.
+
++ Parameters
+
+    + object_identifier: `a3W3B0000002VUoUAM` (required, string) - Site name or unique identifier (Name, Id or External Id).
+    
+        + Members
+            + `401%20S%20Tryon%20St%2C%20Charlotte%2C%20NC%2C%20United%20States`
+            + `a3W3B0000002VUoUAM`
+            + `external_unique_id`
+
+    + fullData: true (optional, enum[boolean]) - `For gettting full information for this specific object.  (default false)`
+
+        + Members
+            + `true`
+            + `false`
+
++ Request (application/json)
+
+    + Headers
+    
+            Authorization: Bearer access_token
+
++ Response 200 (application/json)
+
+    + Attributes (Site_Single)
+
+### Create Site [POST /rest/api/v1/Site]
+
+Creates a new Site record with the data provided in the request  body.
+
++ Request (application/json)
+
+    + Headers
+    
+            Authorization: Bearer access_token
+            
+    + Attributes (Site)
+
++ Response 200 (application/json)
+
+    + Attributes (SHObject)
+
+
+### Update Site [PUT /rest/api/v1/Site/{name}]
+
+Updates a Site record with the data provided in the request  body.
+
++ Parameters
+
+    + name: `a3W3B0000002VeyUAE` (required, string) - Site name or unique identifier (Name, Id or External Id).
+
++ Request (application/json)
+
+    + Headers
+    
+            Authorization: Bearer access_token
+    
+    + Attributes (Site)
+
++ Response 200 (application/json)
+
+    + Attributes (SHObject)
+    
+
+## Group IT Contact
+
+    Information for GET, POST, or PUT http methods related to IT_Contact object.
+    
+### List IT Contacts [GET /rest/api/v1/list{?objectType,provideStats,pageSize,currentPage,searchText}]
+
+Allows you to get all the IT contacts based on the introduced query parameters. Apart from the listed ones you can add any number of field Names with its respective values.
+
+There is two types of IT_contacts, the first one is for `Users` and the second one is for `Contacts`, the differences are that user IT contact is able to login to the System while the contact is not able to do that.
+
+For more information about differences between both, in the Attributes section there is two objects the first one reflex the contact's fields and the second one the user's fields, where every field has its description. And, bellow the attributes there is an example with user and contact objects.
+
++ Parameters
+
+    + objectType: `It_Contact` (required, string) - IT contact name that wants to get records of.
+
+    + provideStats: true (optional, boolean) - Returns an object with relevant information instead of a simple array (provideStats=true).
+
+    + pageSize: 15 (optional, number) - The quantity of records you want to be returned (pageSize=15).
+
+    + currentPage: 3 (optional, number) - Used with page size, necessary for pagination (currentPage=3).
+    
+    + searchText: Angel* (optional, string) - It can be single search criteria or criteria joined by clauses AND, OR. Also it supports wildcarding using '*'.
+        + searchText=John Snow AND JPMC
+        + searchText=Joe Moran OR  John Snow
+        + searchText=Angel*
+   
++ Request
+
+    + Headers
+    
+            Authorization: Bearer access_token
+
++ Response 200 (application/json)
+
+    + Attributes (array)
+        + (IT_Contact_List)
+        + (IT_Contact_List_User)
+
+### Get Single IT Contact [GET /v1/IT_Contact/{name}{?formData,fullData}]
+
+This endpoint lets you get up to date information of a specific IT Contact.
+
++ Parameters
+
+    + name: a1Y3B000000PJkOUAW (required, string) - IT Contact name or unique identifier (Name, Id or External Id).
+
+    + fullData: true (optional, enum[string]) - If you want to get full information for this specific object.
+
+        + Members
+            + `true`
+            + `extended`
+
++ Request (application/json)
+
+    + Headers
+    
+            Authorization: Bearer access_token
+
++ Response 200 (application/json)
+
+    + Attributes (IT_Contact_Single)
+
+### Create IT Contact [POST /rest/api/v1/IT_Contact]
+
+Creates a new IT_Contact record with the data provided in the request  body.
+
++ Request (application/json)
+
+    + Headers
+    
+            Authorization: Bearer access_token
+            
+    + Attributes (IT_Contact)
+
++ Response 200 (application/json)
+
+    + Attributes (SHObject)
+
+### Update IT Contact [PUT /rest/api/v1/IT_Contact/{name}]
+
+Updates a IT Contact record with the data provided in the request  body.
+
++ Parameters
+
+    + name: a1Y3B000000IOOoUAO (required, string) - IT Contact name or unique identifier (Name, Id or External Id).
+
++ Request (application/json)
+
+    + Headers
+    
+            Authorization: Bearer access_token
+    
+    + Attributes (IT_Contact)
+
++ Response 200 (application/json)
+
+    + Attributes (SHObject)
+
+## Group Service Request
+
+    Information for GET, POST, PUT http methods related to Service Request object. (This is for client’s request for an IT Service.)
+    
+### List Service Requests [GET /rest/api/v1/list{?objectType,provideStats,pageSize,currentPage,searchText,orderBy,provideFilterData}]
+
+Allows you to get a list of Service Requests based on the introduced query parameters. Apart from the listed ones you can add any number of field names with its respective values.
+
++ Parameters
+
+    + objectType: `Service_Request` (required, string) - Service Request name that wants to get records of.
+    
+        + <field_name>=<field_value>: `?objectType=Service_Request&Status=Open` (string) - Returns list of SREQ records that matches with param, if not matches are found, an empty array is returned.
+        
+        + <field_name>=IN,<value1>,<value2>: `?objectType=Service_Request&Status=IN,Pending+approval,open` (string) - If <field_name> is a picklist field, IN operator can be used, which allows to specify multiply values separated by commas.
+The IN operator is a shorthand for multiple OR conditions.
+
+    + provideStats: true (optional, boolean) - Returns an object with relevant information instead of a simple array (provideStats=true).
+
+    + pageSize: 15 (optional, number) - The quantity of records you want to be returned (pageSize=15).
+
+    + currentPage: 3 (optional, number) - Used with page size, necessary for pagination (currentPage=3).
+    
+    + searchText: West* (optional, string) - It can be single search criteria or criteria joined by clauses AND, OR. Also it supports wildcarding using '*'.
+        + searchText=New AND 28217
+        + searchText=Charlotte OR New York
+        + searchText=Cirr\*
+    
+    + orderBy: name (optional, string) - It allows multiple fields to be specified in sorting the data for pagination field1, field2, field3 or field1 ASC, field2 DESC, field3 ASC (orderBy=name).
+        + orderBy=name ASC
+        + orderBy=status DESC
+        + orderBy=name,state
+    
+    + provideFilterData: Task_Type_Record,Site (optional, string) - Besides returning SREQ list, returns "filterData" JSON list for the comma-separated fields specified in <filter_options> <filter_options> It allows multiple fields to be specified (provideFilterData=Task_Type_Record,Site).
+   
++ Request
+
+    + Headers
+    
+            Authorization: Bearer access_token
+
++ Response 200 (application/json)
+
+    + Attributes (Service_Request_List)
+
+### Get Single Service Request [GET /rest/api/v1/Service_Request/{name}{?formData,fullData,doLookup,forAction,searchTerm}]
+
+This endpoint allows to retrieve the data information for a specific service request.
+
++ Parameters
+
+    + name: `SREQ-3654` (required, string) - Service request name or unique identifier (Name, Id or External Id).
+
+    + formData: true (optional, enum[string]) - If you want to get all custom form information for this specific object.
+        + *formData=true* Additionally returns intake form fields of a SREQ instance in simple json. 
+        
+        + *formData=schema* Additionally returns even more info than formData=true, like intake form schema (useful for Developers). The intake form fields are returned in a json nested property called "intakeAsJson".
+
+        + *formData=multi-page-schema* Additionally returns even more info about Intake Form and Job Completion Form than formData=schema. in this case, includes information about the pages configured for JCF.
+The job completion form schema which now includes information about pages is returned in a json nested property called "intakeAsJson".
+        
+        + Members
+            + `true` 
+            + `schema`
+            + `multi-page-schema`
+
+    + fullData: true (optional, enum[string]) - If you want to get full information for this specific object.
+        + *fullData=true* Additionally returns related objects to a SREQ instance.
+        
+        + *fullData=extended* Additionally returns  even more info than fullData=true, like "Controller_Info" (useful for Developers).
+
+        + Members
+            + `true`
+            + `extended`
+            
+    + doLookup: Site (optional, enum[string]) - doLookup=<lookup_field> A GET operation with doLookup param, returns all the available data of the lookup field specified in <lookup_field>.
+<lookup_field> must be a SREQ field of type Lookup.
+        + doLookup=Site
+        + doLookup=Request_Owner
+        + doLookup=Account
+    
+        + Members
+            + `Site`
+            + `Request_Owner`
+            + `Account`
+            
+    + forAction: Assign (optional, string) - doLookup=<lookup_field>&forAction=<button_name> A GET operation with doLookup param, returns all the available data of the lookup field specified in <lookup_field> AND the workflow action specified in forAction param 
+<lookup_field> must be a SREQ field of type Lookup.<button_name> must be a workflow action name available for the current SREQ's status
+        + doLookup=Request_Owner&forAction=Assign
+        
+    + searchTerm: on (optional, string) - A GET operation with doLookup param, returns all the available data of the lookup field specified in <lookup_field> AND the search criteria specified in searchTerm param
+<lookup_field> must be a SREQ field of type Lookup.<button_name> must be a workflow action name available for the current SREQ's status
+        + doLookup=Request_Owner&searchTerm=text to find
+
++ Request (application/json)
+
+    + Headers
+    
+            Authorization: Bearer access_token
+
++ Response 200 (application/json)
+
+    + Attributes (Service_Request_Single)
+
+### Create Service Request [POST /rest/api/v1/Service_Request]
+
+Creates a new Service request record with the data provided in the request body.
+If you want to create a new Service request with Intake Form there is a body example next to the service request body.
+
++ Request (application/json)
+
+    + Headers
+    
+            Authorization: Bearer access_token
+            
+    + Attributes (Service_Request_Create)
+
++ Response 200 (application/json)
+
+    + Attributes (SHObject)
+    
++ Request (application/json)
+
+    + Headers
+    
+            Authorization: Bearer access_token
+            
+    + Attributes (SREQ_Intake_Form)
+
++ Response 200 (application/json)
+
+    + Attributes (SHObject)
+
+### Update Service Request [PUT /rest/api/v1/Service_Request/{name}{?action}]
+
+Updates a Service request record with the data provided in the request  body.
+
++ Parameters
+
+    + name: `SREQ-3944` (required, string) - Service request name or unique identifier (Name, Id or External Id).
+
+    + action: Assign (optional, enum[string]) - Using PUT method, workflow actions can be performed which will move a SREQ forward or backward in its lifecycle.
+        This can be achieved by using the action=<button_name> query parameter <button_name> must be a workflow action name available for the current SREQ's status.
+        
+        + `Note.- For using the actions first make sure that you are using an Analyst user.`
+
+        + E.g.:
+            + action=Assign
+            + action=Assign%20To%20Me
+                + Request Payload = {}
+            + action=Cancel
+                + Request Payload= {"Cancel_Reason":"This SREQ is being canceled due to XYZ reason"}
+
+        + Members
+            + `Assign`
+            + `Assign%20To%20Me`
+            + `Cancel`
+
++ Request (application/json)
+
+    + Headers
+    
+            Authorization: Bearer access_token
+    
+    + Attributes (Service_Request_Update)
+
++ Response 200 (application/json)
+
+    + Attributes (SHObject)
+
+## Group Work Order
+
+    Information for GET http method related to Work_Order object.
+
+### List Work Orders [GET /rest/api/v1/list{?objectType,provideStats,pageSize,currentPage,orderBy,provideFilterData}]
+
+Allows you to get all Work Orders based on the introduced query parameters. Apart from the listed ones you can add any number of field Names with its respective values.
+
++ Parameters
+
+    + objectType: `Work_Order` (required, string) - Work order name that wants to get records of.
+    
+        + <field_name>=<field_value>: `?objectType=Service_Request&Status=Open` (string) - Returns list of SREQ records that matches with param, if not matches are found, an empty array is returned.
+        
+        + <field_name>=IN,<value1>,<value2>: `?objectType=Work_order&Status=IN,Work+In+Progress,Closed` (string) - If <field_name> is a picklist field, IN operator can be used, which allows to specify multiply values separated by commas.
+The IN operator is a shorthand for multiple OR conditions.
+
+    + provideStats: true (optional, boolean) - Returns an object with relevant information instead of a simple array (provideStats=true).
+
+    + pageSize: 15 (optional, number) - The quantity of records you want to be returned (pageSize=15).
+
+    + currentPage: 3 (optional, number) - Used with page size, necessary for pagination (currentPage=3).
+    
+    + orderBy: name (optional, string) - It allows multiple fields to be specified in sorting the data for pagination field1, field2, field3 or field1 ASC, field2 DESC, field3 ASC (orderBy=name).
+        + orderBy=name ASC
+        + orderBy=site DESC
+        + orderBy=name,Status
+    
+    + provideFilterData: Task_Type_Record,Site (optional, string) - Besides returning Work Order list, returns "filterData" JSON list for the comma-separated fields specified in <filter_options> <filter_options> It allows multiple fields to be specified (provideFilterData=Task_Type_Record,Site).
+   
++ Request
+
+    + Headers
+    
+            Authorization: Bearer access_token
+
++ Response 200 (application/json)
+
+    + Attributes (Work_Order_List)
+
+### Get Single Work Order [GET /rest/api/v1/Work_Order/{name}{?formData,fullData,doLookup}]
+
+This endpoint allows to retrieve information about a specific Work Order.
+
++ Parameters
+
+    + name: `WO-3619-001`  (required, string) - Work Order name or unique identifier (Name, Id or External Id).
+
+    + formData: true (optional, enum[string]) - If you want to get all custom form information for this specific object.
+
+        + Members
+            + `true`
+            + `schema`
+            + `multi-page-schema`
+
+    + fullData: true (optional, enum[string]) - If you want to get full information for this specific object.
+
+        + Members
+            + `true`
+            + `extended`
+            
+    + doLookup: Site (optional, enum[string]) - A GET operation with doLookup param, returns all the available data of the lookup field specified in <lookup_field>. 
+<lookup_field> must be a WO field of type Lookup.
+
+        + Members
+            + `Site`
+            + `Account` 
+            + `Service_request`
+
++ Request (application/json)
+
+    + Headers
+    
+            Authorization: Bearer  access_token
+
++ Response 200 (application/json)
+
+    + Attributes (Work_Order_Single)
+
+### Get Work Order PDF [GET /rest/api/v1/work-order/{name}/client_pdf]
+
+This endpoint allows to get a Work Order as PDF, but the Apiary does not support the response, so you can try using Postman copying the endpoints and headers.
+
++ Parameters
+
+    + name: `WO-3752-004` (required, string) - Work Order name or unique identifier (Name, Id or External Id).
+
++ Request
+
+    + Headers
+
+            Authorization: Bearer access_token
+
++ Response 200 (application/octet-stream)
+
+## Group Search 
+
+    Calls applicable to all objects
+
+### Search [GET /rest/api/v1/search{?searchTerm,objectTypes,quickSearch,maxListSize}]
+
+Allows you to get all the object based on the introduced query parameters. Apart from the listed ones you can add any number of field Names with its respective values.
+
++ Parameters
+
+    + searchTerm: on (required, string) - Search criteria.
+
+    + objectTypes: Service_Request (optional, enum[string]) - Types of objects related to this search separated by coma, empty to show default (Service request, work order and IT contact.
+    
+        + Members
+            + Service_Request
+            + Site
+            + Work_Order
+            + It_contact
+
+    + quickSearch: true (optional, boolean) - Flag that enables the quick search, true value disables related object search.
+
+    + maxListSize: 5 (optional, number) - If you want to search only certain quantity of records, if not introduced value is 10.
+
++ Request
+
+    + Headers
+    
+            Authorization: Bearer access_token
+
++ Response 200 (application/json)
+
+    + Attributes
+
+        + searchTerm (string)
+        + searchData (object)
+            + Work_Order (SearchedObject)
+            + Service_Request (SearchedObject)
+            + IT_Contact (SearchedObject)
+        + objectTypes (array[string])
+
+
+# Data Structures
+
+## SHObject (object)
+- `id`: `a1Yc0000001rpApEAI` (string) - Unique identifier (Auto generated).
+- `Name`: `ObjectName` (string) - Unique user-friendly identifier.
+<!--Sitehands objects-->
+
+## `Access_Token_Response` (object)
+- `token_type`: Bearer (string) - The type of token this is.
+- `expires_in`: 300 (string) - If the access token expires, the server should reply with the duration of time the access token is granted for.
+- `access_token`: xxxxxxxxxxxxxx (string) - The access token string as issued by the authorization server.
+- `refresh_token`: xxxxxxxxxxxxxx (string) - If the access token will expire, then it is useful to return a refresh token which applications can use to obtain another access token.
+
+## `Service_Request_Create`
+- `Account.Name`: `JPMC` (string) - `This is the company name for the account (Tenancy for Clients and Vendors)`.
+- `Billing_Cost_Center`: `Cost Center001` (string) - Cost Center to be used for billing on this Service Request.
+- `Client_Project_Number`: `85698` (string) - This is the number of client according to the project.
+- `Client_Ticket_Owner.Name`: `Ramses King` (string) - The owner name of the current ticket.
+- `Client_Ticket_Number`: `23653` (string) - The client's ticket number.
+- `Client_Ticketing_System`: `Service Manager` (string) - It specifies the ticket system for the client.
+        - Service Manager
+        - WRM
+        - EURC
+        - Prime
+        - N/A
+        - JIRA
+        
+- `Description`: `This is the scope of the work.` (string) - Detail that helps users understand the purpose of this service request.
+- `Priority`: `3 - Medium` (string) - Priority of the incident.
+        - 1 - Critical
+        - 2 - High
+        - 3 - Medium
+        - 4 - Low
+        - 5 - Trivial
+        
+- `Requested_End`: `2019-02-16T17:46:00.000Z` (string) - The date time when the request has end.
+- `Requested_Start`: `2019-02-15T17:46:00.000Z` (string) - The date time when the request has started.
+- `Site.Name`: `-MCh- 6050 Tyvola Glen Cir, Charlotte, NC 28217, USA` (string) - The site name for physical Location of Clients.
+- `Site_Contact.Name`: `Angelo Boreal` (string) - The name for the site contact.
+- `State`: New (string) - Indicates whether the service request is. Bellow are the possible values:
+        - New
+        - Active
+        - Canceled
+    
+- `Status`: Draft (string) - Specifies the current condition of the service request.
+- `Summary`: `Some a little description about the Service request` (string) - Brief description of what the service request is about.
+- `Task_Type_Record.Name`: `JPMC RSO - Break Fix No OEM` (string) - Specifies the Task Type of the service request its value is the task type record's name.
+
+## `Service_Request_Update`
+- `Account.Name`: `JPMC` (string) - `This is the company name for the account (Tenancy for Clients and Vendors)`.
+- `Additional_Site_Details`: `test additional settings` (string) - This is the details for a Site.
+- `Billing_Cost_Center`: `Cost Center001` (string) - Cost Center to be used for billing on this Service Request.
+- `Client_Access_Ticket_Number`: `number001` (string) - The client's access ticket number.
+- `Client_Access_Ticket_Status`: `Plan Review` (string) - The current status where the ticket is.
+        - Plan Review
+        - Pending Approval
+        - Ready to Implement
+        - LOB Review
+        - Approved
+        - Deferred
+        - Closed
+        - NO RSO X-IMPACT
+        
+- `Client_Access_Window_End`: `2019-01-17T17:44:05.000Z` (string) - The end date time when the client acceded.
+- `Client_Access_Window_Start`: `2019-01-01T17:44:05.000Z` (string) - The date time when the client acceded.
+- `Client_Project_Number`: `85698` (string) - This is the number of client according to the project.
+- `Client_Ticket_Number`: `23653` (string) - The client's ticket number.
+- `Client_Ticket_Owner.Name`: `Ramses King` (string) - The owner name of the current ticket.
+- `Client_Ticketing_System`: `Service Manager` (string) - It specifies the ticket system for the client.
+        - Service Manager
+        - WRM
+        - EURC
+        - Prime
+        - N/A
+        - JIRA
+        
+- `Contact_Type`: `Self-Service` (string) - The mean by which tickets are created.
+- `Description`: `Some details about purpose of requested service.` (string) - Detail that helps users understand the purpose of this service request.
+- `Priority`: `3 - Medium` (string) - Priority of the incident.
+        - 1 - Critical
+        - 2 - High
+        - 3 - Medium
+        - 4 - Low
+        - 5 - Trivial
+        
+- `Purchase_Order_Number`: `number001` (string) - The purchase order number.
+- `Requested_By.Name`: `Nila Bieronski -KT-` (string) - The person name who requests a service.
+- `Requested_By_Group.Name`: `JPMC - Approvers` (string) - The requested group name.
+- `Requested_End`: `2019-02-16T17:46:00.000Z` (string) - The date time when the request has end.
+- `Requested_Start`: `2019-02-15T17:46:00.000Z` (string) - The date time when the request has started.
+- `Rollup_Status`: `Active` (string) - This defines the rollup status. Bellow the possibles:
+        - New
+        - Processing
+        - Active
+        - Complete
+        - Canceled
+        
+- `Site.Name`: `-MCh- 6050 Tyvola Glen Cir, Charlotte, NC 28217, USA` (string) - The site name for physical Location of Clients.
+- `Site_Contact.Name`: `Angelo Boreal` (string) - The site contact's name.
+- `Summary`: `Some a little description about the Service request` (string) - Brief description of what the service request is about.
+
+## `Service_Request_List`
+- `Account.Name`: `AON` (string) - Requester account name.
+- `Account`: `a1W3B000001VDkDUAW` (string) - `This is an unique identifier for the account (Tenancy for Clients and Vendors)`.
+- `Additional_Site_Details`: `test additional settings` (string) - This is the details for a Site.
+- `Billing_Cost_Center`: `Cost Center001` (string) - Cost Center to be used for billing on this Service Request.
+- `Client_Access_Ticket_Number`: `number001` (string) - The client's access ticket number.
+- `Client_Access_Ticket_Status`: `Plan Review` (string) - The current status where the ticket is.
+        - Plan Review
+        - Pending Approval
+        - Ready to Implement
+        - LOB Review
+        - Approved
+        - Deferred
+        - Closed
+        - NO RSO X-IMPACT
+        
+- `Client_Access_Window_End`: `2019-01-17T17:44:05.000Z` (string) - The end date time when the client acceded.
+- `Client_Access_Window_Start`: `2019-01-01T17:44:05.000Z` (string) - The date time when the client acceded.
+- `Client_Approval_Time`: `2019-01-01T17:44:05.000Z` (string) - The date time when the client approves the resolved ticket.
+- `Client_Project_Number`: `85698` (string) - This is the number of client according to the project.
+- `Client_Reject_Reason`: `The machine is still having problems.` (string) - The reason why the client reject the resolved ticket.
+- `Client_Ticket_Number`: `23653` (string) - The client's ticket number.
+- `Client_Ticket_Owner.Name`: `Will Smith` (string) - The owner name of the current ticket.
+- `Client_Ticket_Owner`: `a1Y3B000000Fw0nUAC` (string) - The unique idetifier for current ticket.
+- `Client_Ticketing_System`: `Service Manager` (string) - It specifies the ticket system for the client.
+        - Service Manager
+        - WRM
+        - EURC
+        - Prime
+        
+- `Client`: `JPMC` (string) - It contains the name of the client that wants an IT service.
+- `Closed_By.Id`: `a1Y3B000000Fw0nUAC` (string) - The unique identifier for who closed the ticket.
+- `Closed_By.Name`: `John Smith` (string) - The name for who closed the ticket.
+- `Closed_Date`: `2019-01-18T17:44:05.000Z` (string) - The latest date in which the Problem entered the Closed state.
+- `Contact_Type`: `Self-Service` (string) - The mean by which tickets are created.
+        - Automation
+        - Email
+        - Phone
+        - Self-Service
+        - Walk in
+        
+- `CreatedBy.Name`: `Bruce Wayne` (string) - The person name who created the Service Request. 
+- `CreatedById`: `005c0000004eWumAAE` (string) - The unique identifier for who created the Service Request.
+- `CreatedDate`: `2019-01-17T17:44:05.000Z` (string) - The date and time when the Service Request was created.
+- `Description`: `This is the scope of the work.` (string) - Detail that helps users understand the purpose of this service request.
+- `Estimated_Cost_Max`: `250` (string) - This is an estimation for the max cost for the current ticket.
+- `Estimated_Cost_Min`: `100` (string) - This is an estimation for the min cost for the current ticket.parent
+- `External_ID`: `EXT-7913911` (string) - Client identifier, used for integrating the API with external clients for referencing the external system records, it should be unique.
+- `Id`: `a3S3B000000152uUAA` (string) - The unique identifier for the current Service Request (Auto generated).
+- `Is_Program_or_Project`: false (boolean) - Defines if the Service Request is a project that has other Service Request as children.
+        - false
+        - true
+        
+- `LastModifiedBy.Name`: `Bruce Wayne` (string) - The person name who was the last modifier of Service Request. 
+- `LastModifiedById`: `005c0000004eWumAAE` (string) - The unique identifier for person who was the last modifier.
+- `LastModifiedDate`: `2019-01-17T17:49:41.000Z` (string) - The last date and time when the Service was modifie
+- `Name`: `SREQ-3673` (string) - This is the Service Request name, that client’s request for an IT Service.
+- `Opened_By.Name`: `Bruce Wayne` (string) - The person name who opened the Service Request in the system.
+- `Opened_By`: `a1ac000000AfGCYAA3` (string) - The unique identifier for who created the Service Request in the system, which is different than Request_by. 
+- `Opened`: `2019-02-14T17:48:19.000Z` (string) - The date time when the ticket was opened.
+- `Parent.Name`: `SREQ-3660` (string) - It defines the parent name for current SREQ.
+- `Payment_Pre_Authorized`: false (boolean) - Defines if the payment was pre authorized.
+- `Priority`: `3 - Medium` (string) - Priority of the incident.
+        - 1 - Critical
+        - 2 - High
+        - 3 - Medium
+        - 4 - Low
+        - 5 - Trivial
+        
+- `Proposal_Due_Date`: `2019-02-13` (string) - This is the proposal due Date for finishing the service request.
+- `Purchase_Order_Number`: `number001` (string) - The purchase order number.
+- `RecordType.Name`: `Service Request` (string) - Defines the record type, in this case this is a Service Request. 
+- `RecordTypeId`: `012c0000000APOUAA4` (string) - Unique identifier for the Record type.
+- `Request_Owner`: `a1Y3B000000FwC0UAK` (string) - This is a unique identifier for who is reporting the disruption of service.
+- `Request_Owner.Name`: `Walter Black` (string) - This is the name for who is reporting the disruption of service.
+- `Requested_By.Email`: `Johnny2019@gmail.com` (string) - The email for the client that requests an IT service. 
+- `Requested_By.Name`: `Johnny White` (string) - The person name who requests a service.
+- `Requested_By.Phone`: `25325895` (string) - The requested person's phone number.
+- `Requested_By_Group.Name`: `JPMC - Approvers` (string) - The requested group name.
+- `Requested_By_Group`: `a1d3B000000v662QAA` (string) - The unique identifier for requested group.
+- `Requested_By`: `a1Y3B000000FwBWUA0` (string) - This is the unique identifier for the client that requests an IT service.
+- `Requested_End`: `2019-02-16T17:46:00.000Z` (string) - The date time when the request has end.
+- `Requested_Start`: `2019-02-15T17:46:00.000Z` (string) - The date time when the request has started.
+- `Resolved_Date`: `2019-01-17T17:44:05.000Z` (string) - The date time when the request was resolved.
+- `SREQs_Active_Count`: 0 (number) - The quantity of child Service Requests that are active. 
+- `SREQs_Canceled_Count`: 0 (number) - The quantity of child Service Requests that were canceled.
+- `SREQs_Completed_Count`: 0 (number) - The quantity of child Service Requests that are complete.
+- `SREQs_New_Count`: 0 (number) - The quantity of child Service Requests that are new.
+- `SREQs_Processing_Count`: 0 (number) - The quantity of child Service requests that are processing.
+- `Site_Contact.Name`: `Angelo Boreal` (string) - The name for the site contact.
+- `Site_Contact`: `a1Y3B000000PJSRUA4` (string) - The unique identifier for the site contact.
+- `Site` (Site Base) - This object represents the physical location of the client.
+- `State`: New (string) - Indicates whether the service request is. Bellow are the possible values:
+        - New
+        - Active
+        - Canceled
+        
+- `Status`: Draft (string) - Specifies the current condition of the service request.
+- `Submitted_to_Client_Approval_Time`: `2019-01-17T17:44:05.000Z` (string) - The date time when the ticket was submitted for Client approval.
+- `Summary`: `Some a little description about the Service request` (string) - Brief description of what the service request is about.
+- `Task_Type_Record` (Task Type Record Base) - This object represents the Task Type of the service request.
+- `WOs_Canceled_Count`: 0 (number) - The quantity of child Work orders that were canceled.
+- `WOs_Completed_Count`: 0 (number) - The quantity of child Work orders that were completed.
+- `WOs_Completed_With_Issues_Count`: 0 (number) - The quantity of child Work orders that were completed.
+- `WOs_In_Flight_Count`: 0 (number) - The quantity of child Work orders that were Flighted.
+
+## `Service_Request_Single`
+- `Account.Name`: `AON` (string) - Requester account name.
+- `Account`: `a1W3B000001VDkDUAW` (string) - `This is an unique identifier for the account (Tenancy for Clients and Vendors)`.
+- `Additional_Site_Details`: `The site is located on a good street.` (string) - This is the details for a Site.
+- `Billing_Cost_Center`: `Cost Center001` (string) - Cost Center to be used for billing on this Service Request.
+- `Cancel_Reason`: `Issue not found.` (string) - A little description about why the ticket was canceled.        
+- `Client_Access_Ticket_Number`: `number001` (string) - The client's access ticket number.
+- `Client_Access_Ticket_Status`: `Plan Review` (string) - The current status where the ticket is.
+        - Plan Review
+        - Pending Approval
+        - Ready to Implement
+        - LOB Review
+        - Approved
+        - Deferred
+        - Closed
+        - NO RSO X-IMPACT
+        
+- `Client_Access_Window_End`: `2019-01-17T17:44:05.000Z` (string) - The end date time when the client acceded.
+- `Client_Access_Window_Start`: `2019-01-01T17:44:05.000Z` (string) - The date time when the client acceded.
+- `Client_Approval_Time`: `2019-01-01T17:44:05.000Z` (string) - The date time when the client approves the resolved ticket.
+- `Client_Project_Number`: `85698` (string) - This is the number of client according to the project.
+- `Client_Reject_Reason`: `The machine is still having problems.` (string) - The reason why the client reject the resolved ticket.
+- `Client_Ticket_Number`: `23653` (string) - The client's ticket number.
+- `Client_Ticket_Owner.Name`: `Will Smith` (string) - The owner name of the current ticket.
+- `Client_Ticket_Owner`: `a1Y3B000000Fw0nUAC` (string) - The unique idetifier for current ticket.
+- `Client_Ticketing_System`: `Service Manager` (string) - It specifies the ticket system for the client.
+        - Service Manager
+        - WRM
+        - EURC
+        - Prime
+        - N/A
+        - JIRA
+        
+- `Client`: `JPMC` (string) - It contains the name of the client that wants an IT service.
+- `Closed_By.Id`: `a1Y3B000000Fw0nUAC` (string) - The unique identifier for who closed the ticket.
+- `Closed_By.Name`: `John Smith` (string) - The name for who closed the ticket.
+- `Closed_Date`: `2019-01-18T17:44:05.000Z` (string) - The latest date in which the Problem entered the Closed state.
+- `Contact_Type`: `Self-Service` (string) - The mean by which tickets are created.
+        - Automation
+        - Email
+        - Phone
+        - Self-Service
+        - Walk in
+        
+- `CreatedBy.Name`: `Bruce Wayne` (string) - The person name who created the Service Request. 
+- `CreatedById`: `005c0000004eWumAAE` (string) - The unique identifier for who created the Service Request.
+- `CreatedDate`: `2019-01-17T17:44:05.000Z` (string) - The date and time when the Service Request was created.
+- `Description`: `This is the scope of the work.` (string) - Detail that helps users understand the purpose of this service request.
+- `Disposition_Wait`: `Waiting for Change` (string) - Wait codes for the waiting state for Incident states.
+        - Waiting on User
+        - Waiting on Evidence
+        - Waiting for Problem
+        - Waiting for Change
+        - Waiting for Incident
+        - Waiting on Work Order
+        
+- `Disposition`: `Resolved by User` (string) - A specified disposition for the closure of the Incident.
+        - Solved (Work Around)
+        - Solved (Permanent)
+        - Solved Remotely (Work Around)
+        - Solved Remotely (Permanent)
+        - Solved (Promoted to Problem)
+        - Not Solved (Not Reproducible)
+        - Not Solved (Too Costly)
+        - Resolved by User
+        - Customer Unresponsive
+        
+- `Estimated_Cost_Max`: `250` (string) - This is an estimation for the max cost for the current ticket.
+- `Estimated_Cost_Min`: `100` (string) - This is an estimation for the min cost for the current ticket.
+- `External_ID`: `EXT-7913911` (string) - Client identifier, used for integrating the API with external clients for referencing the external system records, it should be unique.
+- `Id`: `a3S3B000000152uUAA` (string) - The unique identifier for the current Service Request (Auto generated).        
+- `Is_Program_or_Project`: false (boolean) - Defines if the Service Request is a project that has other Service Request as children.
+        - false
+        - true
+        
+- `LastModifiedBy.Name`: `Bruce Wayne` (string) - The person name who was the last modifier of Service Request. 
+- `LastModifiedById`: `005c0000004eWumAAE` (string) - The unique identifier for person who was the last modifier.
+- `LastModifiedDate`: `2019-01-17T17:49:41.000Z` (string) - The last date and time when the Service was modified. 
+- `Name`: `SREQ-3673` (string) - This is the Service Request name, that client’s request for an IT Service.
+- `Opened_By.Name`: `Bruce Wayne` (string) - The person name who opened the Service Request in the system.
+- `Opened_By`: `a1ac000000AfGCYAA3` (string) - The unique identifier for who created the Service Request in the system, which is different than Request_by. 
+- `Opened`: `2019-02-14T17:48:19.000Z` (string) - The date time when the ticket was opened.
+- `Owner.Name`: `Bruce Wayne` (string) - User name who currently owns the database record.
+- `OwnerId`: `005c0000004eWumAAE` (string) - The unique identifier for owner above.
+- `Parent.Name`: `SREQ-3673` (string) - It defines the parent name for current SREQ.
+- `Payment_Pre_Authorized`: false (boolean) - Defines if the payment was pre authorized.
+- `Priority`: `3 - Medium` (string) - Priority of the incident.
+        - 1 - Critical
+        - 2 - High
+        - 3 - Medium
+        - 4 - Low
+        - 5 - Trivial
+        
+- `Proposal_Due_Date`: `2019-01-17T17:44:05.000Z` (string) - This is the proposal due Date for finishing the service request.
+- `Purchase_Order_Number`: `number001` (string) - The purchase order number.
+- `RecordType.Name`: `Service Request` (string) - Defines the record type, in this case this is a Service Request. 
+- `RecordTypeId`: `012c0000000APOUAA4` (string) - Unique identifier for the Record type.
+- `Request_Owner`: `a1Y3B000000FwC0UAK` (string) - This is a unique identifier for who is reporting the disruption of service.
+- `Request_Owner.Name`: `Walter Black` (string) - This is the name for who is reporting the disruption of service.
+- `Requested_By.Email`: `Johnny2019@gmail.com` (string) - The email for the client that requests an IT service. 
+- `Requested_By.Name`: `Johnny White` (string) - The person name who requests a service.
+- `Requested_By_Group.Name`: `JPMC - Approvers` (string) - The requested group name.
+- `Requested_By_Group`: `a1d3B000000v662QAA` (string) - The unique identifier for requested group.
+- `Requested_By`: `a1Y3B000000FwBWUA0` (string) - This is the unique identifier for the client that requests an IT service.
+- `Requested_End`: `2019-01-17T17:44:05.000Z` (string) - The date time when the request has end.
+- `Requested_Start`: `2019-01-01T17:44:05.000Z` (string) - The date time when the request has started.
+- `Resolved_By.Name`: `Bart Simpson` (string) - The name of person who resolved the ticket.
+- `Resolved_By`: `Contact:a1Y3B000000FwBWUA0` (string) - The unique identifier for the person who resolved the ticket.
+- `Resolved_Date`: `2019-01-17T17:44:05.000Z` (string) - The date time when the request was resolved.
+- `Rollup_Status`: `New` (string) - This defines the rollup status. Bellow the possibles:
+        - New
+        - Processing
+        - Active
+        - Complete
+        - Canceled
+        
+- `SREQs_Active_Count`: 0 (number) - The quantity of child Service Requests that are active. 
+- `SREQs_Canceled_Count`: 0 (number) - The quantity of child Service Requests that were canceled.
+- `SREQs_Completed_Count`: 0 (number) - The quantity of child Service Requests that are complete.
+- `SREQs_New_Count`: 0 (number) - The quantity of child Service Requests that are new.
+- `SREQs_Processing_Count`: 0 (number) - The quantity of child Service requests that are processing. 
+- `Second_External_ID`: `EXTSecond012` (string) - The second client identifier for integrating the Service Request records with external clients.
+- `Site_Contact`: `a1Y3B000000PJSRUA4` (string) - The unique identifier for the site contact.
+- `Site_Contact.Name`: `Angelo Boreal` (string) - The name for the site contact.
+- `Site` (Site Base) - This object represents the physical location of the client.
+- `State`: New (string) - Indicates whether the service request is. Bellow are the possible values:
+        - New
+        - Active
+        - Canceled
+
+- `Status`: Draft (string) - Specifies the current condition of the service request.
+- `Submitted_to_Client_Approval_Time`: `2019-01-17T17:44:05.000Z` (string) - The date time when the ticket was submitted for Client approval.
+- `Summary`: `Some a little description about the Service request` (string) - Brief description of what the service request is about.
+- `Task_Type_Record` (Task Type Record Base) - This object represents the Task Type of the service request.
+- `WOs_Canceled_Count`: 0 (number) - The quantity of child Work orders that were canceled.
+- `WOs_Completed_Count`: 0 (number) - The quantity of child Work orders that were completed.
+- `WOs_Completed_With_Issues_Count`: 0 (number) - The quantity of child Work orders that were completed.
+- `WOs_In_Flight_Count`: 0 (number) - The quantity of child Work orders that were Flighted.
+
+## Site
+- `Access_Instructions`: `access instructions name` (string) - This defines the access instruction, in order to give details to Technicians about how to access to client's site.
+- `Account_Secondary_Site_ID`: `528B` (string) - The secondary account site identifier.
+- `Account_Site_ID`: `528` (string) - This defines the account site identifier.
+- `Available_Work_Window`: `Day (8-5);Evening (5-10)` (string) - It defines when is available the Work Window, bellow are the possible values.
+        - Day (8-5)
+        - Evening (5-10)
+        - Night (10-2)
+        - Overnight (2-8)
+        
+- `Billing_City`: `Charlotte` (string) - Billing site's city.
+- `Billing_Country`: `USA` (string) - The Billing Site country name.
+- `Billing_State_Province`: `NC` (string) - This is the State province for Billing Site.
+- `Billing_Street`: `625 S College St` (string) - This is the street of the Billing Site.
+- `Billing_Zip_Postal_Code`: `28212` (string) - This is the number of zip code postal for billing.
+- `City`: `Charlotte` (string) - The city name where the Site is located.
+- `Country_Code`: `US` (string) - This defines the code of the country for current Site.
+- `Country`: `USA` (string) - The country name for the current site.
+- `Default_Currency`: `USD` (string) - It defines the currency for this Site.
+- `Description`: `A little description related to the current Site.` (string) - This is a little description for current Site. 
+- `External_ID`: `EXTID0001` (string) - Client identifier, used for integrating the API with external clients for referencing the external system records, it should be unique.
+- `Fax`: 7043367600 (string) - The Fax number. 
+- `Floor_Room_Number`: `235` (string) - It defines the number of room location.
+- `Name`: `MACD -  615 S College St (string) -  Charlotte (string) -  NC` (string) - This is the Site name of the client, it should be unique.
+- `Phone`: 7043367600 (string) - The phone number.
+- `Second_External_ID`: `EXTID0002` (string) - The second client identifier for integrating the API with external clients.
+- `Short_Description`: `This site was created by Jon and it's located on Charlotte city.` (string) - A little information about Site.
+- `Site_Access_Requirements`: `Escort;Key` (string) - It defines the requirements access for Site separated by ;.
+        - Badge
+        - Escort
+        - Key
+        - Other
+        
+- `Site_Contact_1_On_Site`: true (boolean) - This flag define if there is a contact on the current Site.  
+- `Site_Contact_1_Type`: `Security Manager` (string) - It defines the type of contact.
+- `Site_Contact_1`: `a1Y3B000000PJSMUA4` (string) - The unique identifier for contact 1.
+- `Site_Contact_2_On_Site`: true (boolean) - This flag define if there is a contact on the current Site.
+- `Site_Contact_2_Type`: `Regional POC` (string) -  It defines the type of second contact.
+- `Site_Contact_2`: `a1Y3B000000PJSMUA4` (string) - The unique identifier for contact 2.
+- `Site_Contact_3_On_Site`: true (boolean) - This flag define if there is a contact on the current Site.
+- `Site_Contact_3_Type`: `Security Desk` (string) - It defines the type of third contact.
+- `Site_Contact_3`: `a1Y3B000000PJSMUA4` (string) - The unique identifier for contact 3.
+- `Site_Specific_Info`: `specific info text` (string) - It defines the specific information for the current site.
+- `Site_Type`: `Metropolitan area` (string) - It defines the type of Site. Bellow are the possible values.
+        - Branch Office
+        - Campus
+        - Corporate Office
+        - Data Center
+        - Home Office
+        - Metropolitan area
+        - Multi Site
+        - Other
+        - Regional Office
+        - Site Group
+        
+- `State_Province`: NC (string) - This is a region within a country of the Site.
+- `Street`: 615 S College St (string) - This is the street of the Site.
+- `Street_line_2`: 2nd Street (string)- This si the second street for the current Site.
+- `Timezone`: America/Puerto_Rico (string) - It is a region of the globe that observes a uniform standard time.
+- `Work_Window_Notes`: `Test work window notes` (string) - It defines the notes for work windows.
+- `Zip_Postal_Code`: 28202 (string) - This is the number code of zip postal for the Site.
+
+## `Site_List`
+- `City`: `Charlotte` (string) - The city name where the Site is located.
+- `Country`: USA (string) - The country name for the current site.
+- `Current_Location`: `a2I3B000000irWsUAI` (string) - The unique identifier for the current Region. 
+- `Current_Location.Name`: `Northeast`  (string) - This defines the Region of the current Site.
+- `Id`: a3ac00000003gN6AAI (string) - It's the unique identifier for the Site (Auto generated).
+- `Name`: `MACD, 615 S College St, Charlotte, NC` (string) - This is the Site name of the client, it should be unique.
+- `Short_Description`: This site was created by Jon and it's located on Charlotte city. (string) - A little information about Site.
+- `Site_Location.Latitude`: 35.1652033 (number) - It defines the geographic coordinate that specifies the north–south position of a point on the Earth's surface for the Site.
+- `Site_Location.Longitude`: 80.8935073 (number) - It defines the geographic coordinate that specifies the east–west position of a point on the Earth's surface for the Site.
+- `State_Province`: NC (string) - This is a region within a country of the Site.
+- `Street`: 615 S College St (string) -  This is the street of the Site.
+- `Street_line_2`: 2nd Street (string)- This si the second street for the current Site.
+- `Zip_Postal_Code`: 28202 (string) - This is the number code of zip postal for the Site.
+
+## `Site_Single`
+- `Access_Instructions`: `access instructions name` (string) - This defines the access instruction, in order to give details to Technicians about how to acces to client's site.
+- `Account_Secondary_Site_ID`: `528B` (string) - The secondary account site identifier  
+- `Account_Site_ID`: `528` (string) - This defines the account site identifier.
+- `Available_Work_Window`: `Day (8-5);Evening (5-10)` (string) - It defines when is available the Work Window, bellow are the possible values.
+        - Day (8-5)
+        - Evening (5-10)
+        - Night (10-2)
+        - Overnight (2-8)
+            
+- `Background_Check_Option`: `Default` (string) - The option for checking the Background of technician in order to know the quality of his job, next are the possible options for this porpose:
+        - Default
+        - Check
+        - Skip
+    
+- `Billing_City`: `Charlotte` (string) -  Billing site's city.
+- `Billing_Country`: `USA` (string) - The Billing Site country name.
+- `Billing_Location.Latitude`: `35.1652033` (string) - It defines the geographic coordinate that specifies the north–south position of a point on the Earth's surface for Billing Site.
+- `Billing_Location.Longitude`: `80.8935073` (string) - It defines the geographic coordinate that specifies the east–west position of a point on the Earth's surface for Billing Site.
+- `Billing_State_Province`: `NC` (string) - This si the State province for Billing Site.
+- `Billing_Street`: `625 S College St` (string) - This is the street of the Billing Site. 
+- `Billing_Zip_Postal_Code`: `28212` (string) -  This is the number of zip code postal for billing.
+- `City`: `Charlotte` (string) - The city name where the Site is located.
+- `Country_Code`: `US` (string) -  This defines the code of the country for current Site.
+- `Country`: USA (string) - The country name for the current site.
+- `Current_Location`: `a2I3B000000irWsUAI` (string) - The unique identifier for the current Region. 
+- `Current_Location.Name`: `Northeast`  (string) - This defines the Region of the current Site.
+- `Default_Currency`: `USD` (string) - It defines the currency for this Site.
+- `Description`: `A little description related to the current Site.` (string) - This is a little description for current Site.
+- `External_ID`: EXTID0001 (string) - Client identifier, used for integrating the API with external clients for referencing the external system records, it should be unique.
+- `Fax`: `7043367600` (number) - The Fax number.
+- `Floor_Room_Number`: `235` (string) - It defines the number of room location. 
+- `IT_Asset.Account.Id`: `a1W3B000000h7YjUAI` (string) - The unique identifier for account.
+- `IT_Asset.Account.Name`: `JPMC` (string) - This is the account name for this Site.
+- `Id`: a3ac00000003gN6AAI (string) - It's the unique identifier for the Site (Auto generated). 
+- `Internal_Management_Group`: `a1d3B000000v662QAA` (string) - It's the unique identifier for internal management group.
+- `LastModifiedBy.Name`: `Jon Snow` (string) - It specified the name of person who was the last person that updated the Site.
+- `LastModifiedById`: `0053B000001eZz2QAE`, (string) - It specified the unique identifier for person who was the last modifier.
+- `LastModifiedDate`: `2018-09-18T19:46:50.000Z` (string) - The Date when the last updated was did on the Site.
+- `Name`: `.Amazon.R.O. Site __001 _USD, 615 S College St, Charlotte, NC` (string) - This is the Site name of the client, it should be unique.
+- `Phone`: `7043367600` (number) - The phone number.
+- `Second_External_ID`: `EXTID0002` (string) - The second client identifier for integrating the API with external clients.
+- `Short_Description`: This site was created by Jon and it's located on Charlotte city. (string) - A little information about Site.
+- `Site_Access_Requirements`: `Escort;Key` (string) - It defines the requirements access for Site separted by ;.
+        - Badge
+        - Escort
+        - Key
+        - Other
+
+- `Site_Contact_1_On_Site`: true (boolean) - This flag define if there is a contact on the current Site.  
+- `Site_Contact_1_Type`: `Security Manager` (string) - It defines the type of contact.
+- `Site_Contact_1`: `a1Y3B000000PJSMUA4` (string) - The unique identifier for contact 1.
+- `Site_Contact_2_On_Site`: true (boolean) - This flag define if there is a contact on the current Site.
+- `Site_Contact_2_Type`: `Regional POC` (string) -  It defines the type of second contact.
+- `Site_Contact_2`: `a1Y3B000000PJSMUA4` (string) - The unique identifier for contact 2.
+- `Site_Contact_3_On_Site`: true (boolean) - This flag define if there is a contact on the current Site.
+- `Site_Contact_3_Type`: `Security Desk` (string) - It defines the type of third contact.
+- `Site_Contact_3`: `a1Y3B000000PJSMUA4` (string) - The unique identifier for contact 3.
+- `Site_Contact_3.Name`: `Customer JPMC Child 3`  (string) - The contact 3 name.
+- `Site_Location.Latitude`: 35.1652033 (number) - It defines the geographic coordinate that specifies the north–south position of a point on the Earth's surface for the Site.
+- `Site_Location.Longitude`: 80.8935073 (number) - It defines the geographic coordinate that specifies the east–west position of a point on the Earth's surface for the Site.
+- `Site_Group`: `a3W3B0000002UbBUAU` (string) - The unique identifier for the site group.
+- `Site_Specific_Info`: `specific info text` (string) - It defines the specific information for the current site.  
+- `Site_Type`: `Metropolitan area` (string) - It defines the type of Site. Bellow are the possible values.
+        - Branch Office
+        - Campus
+        - Corporate Office
+        - Data Center
+        - Home Office
+        - Metropolitan area
+        - Multi Site
+        - Other
+        - Regional Office
+        - Site Group
+
+- `State_Province`: NC (string) - This is a region within a country of the Site.
+- `Street`: 615 S College St (string) - This is the street of the Site.
+- `Street_line_2`: 2nd Street (string)- This si the second street for the current Site.
+- `Timezone`: America/Puerto_Rico (string) - It is a region of the globe that observes a uniform standard time.
+- `Work_Window_Notes`: `Test work window notes` (string) - It defines the notes for work windows.
+- `Zip_Postal_Code`: 28202 (string) - This is the number code of zip postal for the Site.
+
+## `Work_Order`
+- `Account`: `a1W3B000000h7YtUAI` (string) - Vendor identifier that is the responsible to make this work order.
+- `Invoice`: `a263B000000kwYuQAI` (string) - Invoice identifier for this particular work order.
+- `Job_Completition_Form`: `a0S3B000001z3SOUAY` (string) - Job completion form identifier that fulfilled proves the completion of a work order.
+- `Service_Request`: `a3S3B00000014t9UAA` (string) - Service request identifier that is the parent of this work order.
+- `Site`: `a3W3B0000007QvkUAE` (string) - `Site identifier where this work order is needed (usually is the same as the service request)`.
+- `Status`: `Vendor Assigned` (string) - Specifies the current condition of the work order.
+- `Summary`: `This is a little description for Work Order.` (string) - Brief description of what this work order is about.
+
+## `Work_Order_List`
+- `Account.Name`: `Coranet Corp` (string) - The Vendor name who is responsible for doing this work order.
+- `Account`: `a1W3B000000h7YtUAI` (string) - Vendor identifier that is the responsible to make this work order.
+- `Id`: `a3q3B000002vv47QAA` (string) - `A unique identifier for the Work Order (Auto generated)`.
+- `Invoice`: `a263B000000kwYuQAI` (string) - Invoice identifier for this particular work order.
+- `Job_Completition_Form`: `a0S3B000001z3SOUAY` (string) - Job completion form identifier that fulfilled proves the completion of a work order.
+- `Name`: `WO-3619-001` (string) - `This is the Work order name`.
+- `Requested_By.Email`: `sanchez2019@gmail.com` (string) - The email for the person that requests a Work Order.
+- `Requested_By.Name`: `Rick Sanchez` (string) - The person name who requests a Work Order.
+- `Requested_By`: `a1Y3B000000IOOoUAO` (string) - This is the unique identifier for the person that requests a Work Order.
+- `Requested_End`: `2019-03-02T19:15:00.000Z` (string) - The end date for requested item.
+- `Requested_Start`: `2019-02-04T19:15:00.000Z` (string) - The start date for requested item.
+- `Service_Request.Client`: `AON` (string) - It contains the name of the client that asked an IT service.
+- `Service_Request.Name`: `SREQ-3619` (string) - The Service Request name that client asked.
+- `Service_Request`: `a3S3B00000014t9UAA` (string) - Service request identifier that is the parent of this work order.
+- `Site` (Site Base) - This object represents the physical location of the client.
+- `Status`: `Vendor Assigned` (string) - Specifies the current condition of the work order.
+- `Summary`: `This is a little description for Work Order.` (string) - Brief description of what this work order is about.
+- `Task_Type_Record` (Task Type Record Base) - This object represents the Task Type of the service request.
+- `Work_Order_Owner.Name`: `Walter Black` (string) - The owner name for the current item.
+- `Work_Order_Owner`: `a1Y3B000000FwC0UAK` (string) - The unique identifier for the current item.
+
+## `Work_Order_Single`
+- `Access_Email_Status`: `Open` (string) - `Related to colocation facilities, possible to be open (default one), sent, or N/A.` 
+- `Account.Name`: `Coranet Corp` (string) - The Vendor name who is responsible for doing this work order.
+- `Account`: `a1W3B000000h7YtUAI` (string) - Vendor identifier that is the responsible to make this work order.
+- `Check_Out_and_Submit`: false (boolean) - When the work is done on a Work order and it goes directly to submit the Work Order.
+- `City_State`: `New York (string) - NY` (string) - The name of the city.
+- `Client_Account.Name`: `AON` (string) - It contains the account name of the client account that wants an IT service.
+- `Client_Account`: `a1W3B000001VDkDUAW` (string) - It contains the unique identifier for client account.
+- `Customer_Resolution_Notes_Submitted`: false (boolean) - `Notes that customer about work submitted (previous one related).`
+- `Id`: `a3q3B000002vv47QAA` (string) - `A unique identifier for the Work Order (Auto generated)`.
+- `Invoice.Name`: `INV-3619-001` (string) - Invoice name for this particular work order.
+- `Invoice`: `a263B000000kwYuQAI` (string) - Invoice identifier for this particular work order.
+- `Job_Completion_Form.Name`: `QA Checklist` (string) - The form completion name.
+- `LastModifiedBy.Name`: `Walter Black` (string) - The name for person who was the las modifier.
+- `LastModifiedById`: `0053B000001effwQAA` (string) - The unique identifier for person who was the last modifier.
+- `LastModifiedDate`: `2019-02-04T19:10:31.000Z` (string) -  The Date when the last updated was did on the Work order.
+- `Latest_Possible_Start`: `2019-02-04T19:15:00.000Z` (string) - The last date time that the Work order can start.
+- `Name`: `WO-3619-001` (string) - `This is the Work order name`.
+- `Opened_By.Name`: `Rick Sanchez` (string) - The person name who opened the Work order in the system.
+- `Opened_By`: `a1Y3B000000IOOoUAO` (string) - The unique identifier for who opened the Work order in the system, which is different than Request_by.
+- `Owner.Name`: `Walter Black` (string) - User name who currently owns the database record.
+- `OwnerId`: `0053B000001effwQAA` (string) - The unique identifier for owner above.
+- `RecordType.Name`: `Standard` (string) - Defines the record type name.
+- `RecordTypeId`: `0123B0000008qxAQAQ` (string) - Unique identifier for the Record type.
+- `Requested_By.Email`: `sanchez2019@gmail.com` (string) - The email for the person that requests a Work Order.
+- `Requested_By.Name`: `Rick Sanchez` (string) - The person name who requests a Work Order.
+- `Requested_By`: `a1Y3B000000IOOoUAO` (string) - This is the unique identifier for the person that requests a Work Order.
+- `Requested_End`: `2019-03-02T19:15:00.000Z` (string) - The end date for requested item.
+- `Requested_Start`: `2019-02-04T19:15:00.000Z` (string) - The start date for requested item.
+- `Revisit_Required`: false (boolean) - Defines if the Work order needs a revisit.
+- `Revisit`: false (boolean) - Defines if this item was visit again.
+- `Rollup_Status`: `In Flight` (string) - This defines the rollup status.
+- `Service_Request.Client`: `AON` (string) - It contains the name of the client that asked an IT service.
+- `Service_Request.Name`: `SREQ-3619` (string) - The Service Request name that client asked.
+- `Service_Request`: `a3S3B00000014t9UAA` (string) - Service request identifier that is the parent of this work order.
+- `Site` (Site Base) - This object represents the physical location of the client.
+- `State`: `Vendor Assigned` (string) - Indicates the current status for Work order.
+- `Status`: `Vendor Assigned` (string) - Specifies the current condition of the work order.
+- `Summary`: `This is a little description for Work Order.` (string) - Brief description of what this work order is about.
+- `Task_Type_Record` (Task Type Record Base) - This object represents the Task Type of the service request.
+- `Technician_Access_Approval_Status`: `Needs Submission` (string) - Defines the Technician access approval status.
+- `Vendor_Assignment_Time`: `2019-02-04T19:10:18.000Z` (string) - Date and time when it was assigned by Vendor.
+- `Work_Order_Owner.Name`: `Walter Black` (string) - The owner name for the current item.
+- `Work_Order_Owner`: `a1Y3B000000FwC0UAK` (string) - The unique identifier for the current item.
+
+## `IT_Contact`
+- `Contact.Account.Name`: `Contact Account` (string) - 
+- `Contact.Email`: `email@gmail.com` (string) - The contact's email.
+- `Contact.FirstName`: `Max Holloway ` (string) - Contact's first name.
+- `Contact.LastName`: `SF Contact` (string) - Contact's last name.
+- `Contact.MailingCity`: `Charlotte` (string) - Contact's mailing city.
+- `Contact.MailingCountry`: `USA` (string) - Contact's mailing country.
+- `Contact.MailingPostalCode`: `28202` (string) - Contact's mailing postal code number.
+- `Contact.MailingState`: `NC` (string) - Contact's mailing state.
+- `Contact.MailingStreet`: `401 S Tryon St` (string) - Contact's mailing street.
+- `Contact.MobilePhone`: `460-6555` (string) - Contact's mobile phone number.
+- `Contact.OtherCity`: `Charlotte` (string) - Contact's other city.
+- `Contact.OtherCountry`: `USA` (string) - Contact's other country.
+- `Contact.OtherPostalCode`: `28202` (string) - Contact's other postal code.
+- `Contact.OtherState`: `NC` (string) - Contact's other state.
+- `Contact.OtherStreet`: `401 S Tryon St` (string) - Contact's other street.
+- `Contact.Phone`: `(832) 460-6555` (string) - Contact's phone number.
+- `Description`: `Some description` (string) - Contact's description.
+- `External_ID`: `EXT765823` (string) - Contact's External unique identifier, used for integrating the API with external clients for referencing the external system records, it should be unique.`
+- `SID`: `test_SID` (string) - This is an unique identifier for current contact.
+- `Second_External_ID`: `EXT-Second` (string) - The second unique identifier for integration with external clients.
+- `Short_Description`: `A little description.` (string) - This is a little description about Contact.
+
+## `IT_Contact_User`
+- `User`: `0053B0000021JpzQAE` (string) - Unique identifier of Salesforce users.
+- `Email`: `sanchez2019@gmail.com` (string) - Email of the user should be unique.
+
+## `IT_Contact_List_User`
+- `IT_Asset.Account.Id`: `a1W3B000001VDkDUAW` (string) - The unique identifier for account.
+- `IT_Asset.Account.Name`: `AON` (string) - This is the account name for this IT contact.
+- `Id`: `a1Y3B000000IOOoUAO` (string) - The unique identifier for IT contact.
+- `Name`: `Rick Sanchez` (string) - The name of IT contact.
+- `User.City`: `New York City` (string) - User's city.
+- `User.Country`: `USA` (string) - Country name for user.
+- `User.Email`: `sanchez2019@gmail.com` (string) - User's email. 
+- `User.FirstName`: `Rick` (string) - User's first name.
+- `User.LanguageLocaleKey`: `en_US` (string) - Defines the language local key.
+- `User.LastName`: `Sanchez` (string) - User's last name.
+- `User.PostalCode`: `10014` (string) - Zip code postal of the user.
+- `User.State`: `NY` (string) - This is a region within a country of the User is located.
+- `User.Street`: `290 W 12th St` (string) - User's street.
+- `User.TimeZoneSidKey`: `America/New_York` (string) - User's time zone identifier.
+- `User`: `0053B0000021JpzQAE` (string) - User's unique identifier.
+
+## `IT_Contact_List`
+- `Contact`: `0033B00000QK8HXQA1` (string) - Unique identifier for contact (Auto generated)
+- `Contact.OtherCountry`: `USA` (string) - Contact's other country.
+- `Contact.OtherPostalCode`: `28202` (string) - Contact's other postal code. 
+- `Contact.OtherState`: `NC` (string) - Contact's other state.
+- `Contact.OtherCity`: `Charlotte` (string) - Contact's other city.
+- `Contact.OtherStreet`: `401 S Tryon St` (string) - Contact's other street.
+- `Contact.MailingCountry`: `USA` (string) - The contact's mailing country.
+- `Contact.MailingPostalCode`: `28202` (string) - The contact's mailing postal code.
+- `Contact.MailingState`: `NC` (string) - The contact's state or province name.
+- `Contact.MailingCity`: `Charlotte` (string) - The contact's mailing city.
+- `Contact.MailingStreet`: `401 S Tryon St` (string) - Contact's mailing street.
+- `Contact.MobilePhone`: `460-6555` (string) - Contact's mobile number. 
+- `Contact.Phone`: `555 76565` (string) - Contact's phone number.
+- `Contact.Email`: `email@gmail.com` (string) - The contact's email.
+- `IT_Asset.Account.Name`: `JPMC` (string) - This is the account name for this IT contact.
+- `IT_Asset.Account.Id`: `a1W3B000000h7YjUAI` (string) - The unique identifier for account.
+- `Id`: `a1Y3B000000PJkOUAW` (string) - The unique identifier for IT contact.
+- `Name`: `Max Holloway SF Contact` (string) - The IT contact name.
+- `Short_Description`: `test short description` (string) - A little description about IT contact.
+
+## `IT_Contact_Single`
+- `Background_Check_Enforcement`: `2018-07-10T19:55:54.000Z` (string) - `The date time when the background was checked.`
+- `Background_Check_External_ID`: `A unique external id` (string) - Unique case sensitive field for external Id.
+- `Contact` (Contact Base) - This object represents the contact's fields.
+- `CreatedBy.Name`: `Kelly Kamm` (string) - `The person name who created this item.`
+- `CreatedById`: `0053B000001eWTIQA2` (string) - `The unique identifer for person who created it.`
+- `CreatedDate`: `2018-07-10T19:55:54.000Z` (string) - `The date time when it was created.`
+- `Description`: `test description` (string) - This is the contact's description.
+- `Email`: `email@gmail.com` (string) - IT contact's email.
+- `External_ID`: `EXT765823` (string) - `Client identifier, used for integrating the API with external clients for referencing the external system records, it should be unique.`
+- `Has_Passed_Background_Check`: `Not Required` (string) - Indicates the current state for checking background.
+        - Failed
+        - In Progress
+        - Not Required
+        - Passed
+        
+- `IT_Asset.Account.Id`: `a1W3B000000h7YjUAI` (string) - The unique identifier for account.
+- `IT_Asset.Account.Name`: `Child JPMC Retail` (string) - This is the account name for this IT contact.
+- `Id`: `a1Y3B000000L1PuUAK` (string) - The unique identifier for IT contact.
+- `LastModifiedBy.Name`: `Kelly Kamm` (string) - The person name who was the last modifier of IT contact.
+- `LastModifiedById`: `0053B000001eWTIQA2` (string) - The unique identifier for person who was the last modifier.
+- `LastModifiedDate`: `2018-07-10T19:55:56.000Z` (string) - The last date and time when the IT contact was modified.
+- `Name`: `Max Holloway SF Contact` (string) -  Contact's name.
+- `Phone`: `(832) 460-6555` (string) - Contact's phone number.
+- `SID`: `test_SID` (string) - `Usually it is entered for real users of the system with a valid unique ID for the user.`
+- `Second_External_ID`: `EXT-Second` (string) - `The second client identifier for integrating the API with external clients.`
+- `Short_Description`: `test short description` (string) - This is a little description for current IT_contact.
+- `User` (User Base) - This object represents the user's fields.
+
+
+## `SREQ_Intake_Form` (Service_Request_Create)
+- `&exampleField1` (string) - Intake form field.
+- `&exampleField2` (string) - Intake form field.
+
+## Contact Base
+- `Contact.Email`: `email@gmail.com` (string) - The contact's email.
+- `Contact.MailingCity`: `Charlotte` (string) - The contact's mailing city.
+- `Contact.MailingCountry`: `USA` (string) - The contact's mailing country.
+- `Contact.MailingPostalCode`: `28202` (string) - The contact's postal code.
+- `Contact.MailingState`: `NC` (string) - The contact's state or province name.
+- `Contact.MailingStreet`: `401 S Tryon St` (string) - Contact's mailing street.
+- `Contact.MobilePhone`: `460-6555` (string) - Contact's mobile phone number.
+- `Contact.Name`: `Max Holloway SF Contact` (string) - Contact's name.
+- `Contact.OtherCity`: `Charlotte` (string) - Contact's other city.
+- `Contact.OtherCountry`: `USA` (string) - Contact's other country.
+- `Contact.OtherPostalCode`: `28202` (string) - Contact's other postal code. 
+- `Contact.OtherState`: `NC` (string) - Contact's other state.
+- `Contact.OtherStreet`: `401 S Tryon St` (string) - Contact's other street.
+- `Contact.Phone`: `(832) 460-6555` (string) - Contact's phone number.
+- `Contact`: `0033B00000QK8HXQA1` (string) - Unique identifier for contact (Auto generated)
+
+## User Base
+- `User.Country`: `USA` (string) - User's country.
+- `User.Email`: `contactemailnew1+telesa@gmail.com` (string) - User's email.
+- `User.FirstName`: `Child Theresa` (string) - User's first name.
+- `User.LanguageLocaleKey`: `en_US` (string) - User's language locale key.
+- `User.LastName`: `Maldini` (string) - User's last name.
+- `User.LocaleSidKey`: `en_US` (string) - The user's locale key.
+- `User.Name`: `Child Theresa Maldini` (string) - User's full name.
+- `User.TimeZoneSidKey`: `America/New_York` (string) - The time zone identifier key.
+- `User`: `0053B000001nsnhQAA` (string) - Unique identifier for user (Auto generated)
+
+## Task Type Record Base
+- `Task_Type_Record.Category`: `Ad Hoc Project` (string) - Defines the category of task type record.
+- `Task_Type_Record.Is_Project_Container`: false (boolean) - It defines if the Service Request will be used as a container.
+- `Task_Type_Record.Name`: `AON Intake - Release Candidate-Sprint29` (string) - This is the IT services, type name offered to Clients.
+- `Task_Type_Record.Service_Domain`: `Field Services` (string) - The nature of the service is required.
+- `Task_Type_Record`: `a3R3B000000YL5CUAW` (string) - Specifies the Task Type of the service request its value is a unique identifier.
+
+## Site Base
+- `Site.City`: `New York` (string) - The city name where the client is located.
+- `Site.Country`: `United States of America` (string) - The country name for the client's site.
+- `Site.Name`: `AON-NY 10019 Building NB` (string) - This is the name for physical Location of Client.
+- `Site.State_Province`: `NY` (string) - This is a region within a country where is located the client.
+- `Site.Street`: `11 W 53rd St` (string) - The client's street.
+- `Site.Zip_Postal_Code`: `10019` (string) - This is the number code of zip postal for the client's Site. 
+- `Site`: `a3W3B0000007QvkUAE` (string) - The unique identifier for physical Location of Clients.
+
+## `SearchedObject` (object)
+- totalSize (number)
+- returnedSize (number)
+- pageNumber (number)
+- listData (array[SHObject]) - An array of all the records that match the search criteria.
